@@ -1,0 +1,6 @@
+Name: particlebot2
+Description: An IRC bot framework
+Version: @PROJECT_VERSION@
+Requires: guosh >= 0.4.0
+Cflags: -I@CMAKE_INSTALL_PREFIX@/include/
+Libs: -L@CMAKE_INSTALL_PREFIX@/lib/ -lparticlebot2
