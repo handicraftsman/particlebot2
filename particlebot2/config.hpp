@@ -28,10 +28,11 @@ namespace pb2 {
 
   struct config_group_t {
     // A vector of plugin / flag-name pairs
-    std::vector<std::pair<std::string, std::string>> config;
+    std::vector<std::pair<std::string, std::string>> flags;
   };
 
   struct config_t {
+    std::string prefix;
     std::map<std::string, config_server_t> servers;
     std::map<std::string, config_plugin_t> plugins;
     std::map<std::string, config_group_t> groups;

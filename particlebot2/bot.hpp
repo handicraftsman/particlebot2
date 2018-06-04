@@ -8,9 +8,10 @@ namespace pb2 {
 
   class bot_private;
 
-  class bot {
+  class bot : public particledi::dependency {
   public:
     bot(particledi::dm_ptr dm);
+    virtual ~bot();
 
   private:
     std::shared_ptr<bot_private> priv;
