@@ -12,18 +12,6 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 
 
-find_package(Doxygen)
-if (Doxygen_FOUND)
-  configure_file(${CMAKE_SOURCE_DIR}/Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile)
-  add_custom_target(
-    doc ALL
-    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    VERBATIM
-  )
-endif()
-
-
 find_package(PkgConfig REQUIRED)
 pkg_search_module(Guosh REQUIRED guosh>=0.4.0)
 pkg_search_module(PDI REQUIRED particledi>=0.3.0)
@@ -40,8 +28,20 @@ target_include_directories(libparticlebot2 PRIVATE ${PB2_INCLUDE_DIRS})
 set_target_properties(libparticlebot2 PROPERTIES OUTPUT_NAME particlebot2)
 
 add_executable(particlebot2 main.cpp)
-target_link_libraries(particlebot2 PRIVATE libparticlebot2 ${PB2_LIBRARIES})
+target_link_libraries(particlebot2 libparticlebot2 ${PB2_LIBRARIES})
 target_include_directories(particlebot2 PRIVATE ${PB2_INCLUDE_DIRS})
+
+
+pkg_search_module(PTEST particletest)
+if(PTEST_FOUND)
+  file(GLOB pb2t_SRC test/*.cpp)
+  add_executable(pb2test-bin ${pb2t_SRC})
+  target_link_libraries(pb2test-bin libparticlebot2 ${PTEST_LIBRARIES})
+  target_include_directories(pb2test-bin PRIVATE . ${PTEST_INCLUDE_DIRS})
+
+  enable_testing()
+  add_test(pb2test pb2test-bin)
+endif()
 
 
 configure_file(${CMAKE_SOURCE_DIR}/particlebot2.pc.in ${CMAKE_BINARY_DIR}/particlebot2.pc)
