@@ -8,9 +8,8 @@
 #include "particlebot2/db_service.hpp"
 #include "particlebot2/plugin_service.hpp"
 
-// IRC Socket
+// Bot components
 #include "particlebot2/ircsocket.hpp"
-#include "particlebot2/ircsocket_fake.hpp"
 #include "particlebot2/ircstream.hpp"
 
 // The bot itself
