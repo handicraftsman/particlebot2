@@ -16,9 +16,8 @@ find_package(PkgConfig REQUIRED)
 pkg_search_module(Guosh REQUIRED guosh>=0.4.0)
 pkg_search_module(PDI REQUIRED particledi>=0.3.0)
 pkg_search_module(PINI REQUIRED particleini)
-pkg_search_module(HTTPD REQUIRED libmicrohttpd)
-set(PB2_LIBRARIES ${Guosh_LIBRARIES} ${PDI_LIBRARIES} ${PINI_LIBRARIES} ${HTTPD_LIBRARIES})
-set(PB2_INCLUDE_DIRS ${Guosh_INCLUDE_DIRS} ${PDI_INCLUDE_DIRS} ${PINI_INCLUDE_DIRS} ${HTTP_INCLUDE_DIRS})
+set(PB2_LIBRARIES ${Guosh_LIBRARIES} ${PDI_LIBRARIES} ${PINI_LIBRARIES} dl pthread)
+set(PB2_INCLUDE_DIRS ${Guosh_INCLUDE_DIRS} ${PDI_INCLUDE_DIRS} ${PINI_INCLUDE_DIRS})
 
 
 file(GLOB pb2_SRC particlebot2/*.cpp)
@@ -27,21 +26,14 @@ target_link_libraries(libparticlebot2 ${PB2_LIBRARIES})
 target_include_directories(libparticlebot2 PRIVATE ${PB2_INCLUDE_DIRS})
 set_target_properties(libparticlebot2 PROPERTIES OUTPUT_NAME particlebot2)
 
+file(GLOB pb2_core_SRC core/*.cpp)
+add_library(pb2-core SHARED ${pb2_core_SRC})
+target_link_libraries(pb2-core libparticlebot2 ${PB2_LIBRARIES})
+target_include_directories(pb2-core PRIVATE . ${PB2_INCLUDE_DIRS})
+
 add_executable(particlebot2 main.cpp)
 target_link_libraries(particlebot2 libparticlebot2 ${PB2_LIBRARIES})
 target_include_directories(particlebot2 PRIVATE ${PB2_INCLUDE_DIRS})
-
-
-pkg_search_module(PTEST particletest)
-if(PTEST_FOUND)
-  file(GLOB pb2t_SRC test/*.cpp)
-  add_executable(pb2test-bin ${pb2t_SRC})
-  target_link_libraries(pb2test-bin libparticlebot2 ${PTEST_LIBRARIES})
-  target_include_directories(pb2test-bin PRIVATE . ${PTEST_INCLUDE_DIRS})
-
-  enable_testing()
-  add_test(pb2test pb2test-bin)
-endif()
 
 
 configure_file(${CMAKE_SOURCE_DIR}/particlebot2.pc.in ${CMAKE_BINARY_DIR}/particlebot2.pc)
@@ -49,7 +41,7 @@ install(FILES ${CMAKE_BINARY_DIR}/particlebot2.pc DESTINATION lib/pkgconfig)
 
 
 install(
-  TARGETS particlebot2 libparticlebot2 
+  TARGETS particlebot2 libparticlebot2 pb2-core
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
 )

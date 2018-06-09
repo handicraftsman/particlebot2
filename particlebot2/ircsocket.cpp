@@ -1,5 +1,4 @@
 #include "ircsocket.hpp"
-#include "ircsocket_fake.hpp"
 
 #include <queue>
 
@@ -12,28 +11,6 @@ namespace pb2 {
    */ 
 
   ircsocket_base::~ircsocket_base() {}
-
-  /*
-   * Fake implementation
-   */
-
-  ircsocket_fake::ircsocket_fake() {}
-
-  ircstream ircsocket_fake::stream() {
-    return ircstream(*this);
-  }
-
-  std::string ircsocket_fake::get() {
-    return ss.str();
-  }
-
-  void ircsocket_fake::clear() {
-    ss.str("");
-  }
-
-  void ircsocket_fake::enqueue(std::string& msg) {
-    ss << msg;
-  }
 
   /*
    * Private declaration
@@ -96,7 +73,11 @@ namespace pb2 {
   /*
    * Protected implementation
    */
-  
+
+  void ircsocket::connect() {
+    
+  }
+
   void ircsocket::enqueue(std::string& msg) {
     priv->enqueue(msg);
   }

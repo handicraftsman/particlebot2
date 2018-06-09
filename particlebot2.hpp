@@ -9,6 +9,8 @@
 #include "particlebot2/plugin_service.hpp"
 
 // Bot components
+#include "particlebot2/event.hpp"
+#include "particlebot2/plugin.hpp"
 #include "particlebot2/ircsocket.hpp"
 #include "particlebot2/ircstream.hpp"
 

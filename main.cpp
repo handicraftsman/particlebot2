@@ -87,6 +87,7 @@ int main(int argc, char** argv) {
   pb2::bot* bot = new pb2::bot(dm);
 
   bot->load_config();
+  bot->start();
 
   return 0;
 }

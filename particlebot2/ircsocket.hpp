@@ -9,12 +9,14 @@
 #include "config.hpp"
 namespace pb2 {
   
+  class bot;
   class ircsocket_base;
   class ircsocket_private;
   class ircstream;
 
   class ircsocket : public ircsocket_base {
   public:
+    friend bot;
     friend ircsocket_private;
     friend ircstream;
 
@@ -26,6 +28,8 @@ namespace pb2 {
     virtual ircstream stream();
 
   protected:
+    virtual void connect();
+
     virtual void enqueue(std::string& msg);
 
   private:
