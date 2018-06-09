@@ -69,8 +69,14 @@ namespace pb2 {
     if (handler_opt) {
       event_handler handler = handler_opt.value();
       std::shared_ptr<void> _handle = handle;
-      std::async([handler, e, _handle] () {
-        handler(e);
+      std::async([this, &id, handler, e, _handle] () {
+        try {
+          handler(e);
+        } catch (std::exception& exc) {
+          char* exc_name = abi::__cxa_demangle(typeid(exc).name(), nullptr, nullptr, nullptr);
+          l.error("Exception: %s (%s)\n\tin %s handler", exc_name, exc.what(), id.c_str());
+          free(exc_name);
+        }
       });
     }
   }

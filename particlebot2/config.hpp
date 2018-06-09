@@ -9,7 +9,6 @@ namespace pb2 {
   struct config_address_t {
     std::string host;
     int port;
-    bool ssl;
   };
 
   struct config_server_t {

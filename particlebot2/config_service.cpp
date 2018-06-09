@@ -18,7 +18,6 @@ static void add_server_address(
   auto m = std::smatch {};
 
   if (std::regex_match(astr, m, regex_addr)) {
-    addr.ssl = m[2].matched;
     addr.host = m[1];
     addr.port = std::stoi(m[3]); 
   }

@@ -7,6 +7,7 @@
 namespace pb2 {
 
   class bot;
+  class bot_private;
   class ircstream;
 
   class ircsocket_base {
@@ -14,6 +15,7 @@ namespace pb2 {
     typedef std::shared_ptr<ircsocket_base> ptr;
     
     friend bot;
+    friend bot_private;
     friend ircstream;
 
     virtual ~ircsocket_base();

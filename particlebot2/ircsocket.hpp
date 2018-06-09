@@ -2,11 +2,15 @@
 
 #include <particledi.hpp>
 
+#include <guosh.hpp>
+
 #include "ircsocket_base.hpp"
 
 #include "ircstream.hpp"
 
 #include "config.hpp"
+
+
 namespace pb2 {
   
   class bot;

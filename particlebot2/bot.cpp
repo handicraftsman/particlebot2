@@ -87,8 +87,8 @@ namespace pb2 {
   }
 
   void bot_private::start() {
-    for (std::pair<std::string, ircsocket_base::ptr> sock : sockets) {
-      //sock.connect();
+    for (std::pair<std::string, ircsocket_base::ptr> p : sockets) {
+      p.second->connect();
     }
 
     while (true)
