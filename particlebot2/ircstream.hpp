@@ -29,6 +29,13 @@ namespace pb2 {
     static std::string ctcp(std::string target, std::string type, std::string message);
     static std::string nctcp(std::string target, std::string type, std::string message);
 
+    static std::string join(std::string channel);
+    static std::string join(std::string channel, std::string password);
+    
+    static std::string part(std::string channel, std::string reason = "Bye!");
+
+    static std::string who(std::string channel);
+
   protected:
     std::streambuf::int_type overflow(std::streambuf::int_type c);
 

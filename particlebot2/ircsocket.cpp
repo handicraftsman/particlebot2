@@ -19,6 +19,9 @@
 
 #include <cxxabi.h>
 
+#include "bot.hpp"
+#include "event.hpp"
+
 namespace pb2 {
 
   /*
@@ -49,6 +52,8 @@ namespace pb2 {
     void enqueue(std::string& msg);
 
     ircsocket& pub;
+
+    std::weak_ptr<particledi::dm> dm;
     
     int addr_pos;
     int conn;
@@ -74,17 +79,19 @@ namespace pb2 {
 
   ircsocket_private::ircsocket_private(
     ircsocket& _pub,
-    std::weak_ptr<particledi::dm> dm,
+    std::weak_ptr<particledi::dm> _dm,
     std::string name,
     config_server_t& _cfg
   )
   : pub(_pub)
+  , dm(_dm)
   , addr_pos(0)
   , conn(0)
   , cfg(_cfg)
   , l("!" + name)
   , running(false)
   {
+    l.iochars = "IRC";
     std::thread(std::bind(&ircsocket_private::read_loop, this)).detach();
     std::thread(std::bind(&ircsocket_private::write_loop, this)).detach();
   }
@@ -104,6 +111,8 @@ namespace pb2 {
     std::lock_guard<std::mutex> running_lock(running_mtx);
     
     try {
+      pub.flushq();
+      
       config_address_t addr = get_next_addr();
       
       l.important("Connecting to %s:%d...", addr.host.c_str(), addr.port);
@@ -138,9 +147,15 @@ namespace pb2 {
       }
       
       running = true;
+      
+      std::shared_ptr<bot> b = dm.lock()->get<bot>();
+      b->emit(event_connect::create(b.get(), &pub));
     } catch (std::exception& exc) {
       char* exc_name = abi::__cxa_demangle(typeid(exc).name(), nullptr, nullptr, nullptr);
       l.error("Exception: %s (%s)", exc_name, exc.what());
+      l.important("Disconnected");
+      std::shared_ptr<bot> b = dm.lock()->get<bot>();
+      b->emit(event_disconnect::create(b.get(), &pub));
       free(exc_name);
     }
   }
@@ -191,6 +206,9 @@ namespace pb2 {
         } catch (std::exception& exc) {
           char* exc_name = abi::__cxa_demangle(typeid(exc).name(), nullptr, nullptr, nullptr);
           l.error("Exception: %s (%s)", exc_name, exc.what());
+          l.important("Disconnected");
+          std::shared_ptr<bot> b = dm.lock()->get<bot>();
+          b->emit(event_disconnect::create(b.get(), &pub));
           free(exc_name);
           running = false;
         }
@@ -246,6 +264,9 @@ namespace pb2 {
         } catch (std::exception& exc) {
           char* exc_name = abi::__cxa_demangle(typeid(exc).name(), nullptr, nullptr, nullptr);
           l.error("Exception: %s (%s)", exc_name, exc.what());
+          l.important("Disconnected");
+          std::shared_ptr<bot> b = dm.lock()->get<bot>();
+          b->emit(event_disconnect::create(b.get(), &pub));
           free(exc_name);
           running = false;
           wrote = true;
@@ -286,6 +307,11 @@ namespace pb2 {
 
   void ircsocket::enqueue(std::string& msg) {
     priv->enqueue(msg);
+  }
+  
+  void ircsocket::flushq() {
+    std::queue<std::string> q;
+    std::swap(priv->q, q);
   }
 
 }

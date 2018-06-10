@@ -13,6 +13,7 @@ namespace pb2 {
   class ircsocket_base {
   public:
     typedef std::shared_ptr<ircsocket_base> ptr;
+    typedef ircsocket_base* cptr;
     
     friend bot;
     friend bot_private;
@@ -21,6 +22,7 @@ namespace pb2 {
     virtual ~ircsocket_base();
 
     virtual ircstream stream() = 0;
+    virtual void flushq() = 0;
 
   protected:
     virtual void connect() = 0;

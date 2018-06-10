@@ -117,9 +117,12 @@ namespace pb2 {
     return priv->get_socket(name);
   }
 
-  void bot::start() {
-    event::ptr e = event_test::create(this);
+  void bot::emit(event::ptr e) {
     priv->pl_s->emit(e);
+  }
+
+  void bot::start() {
+    emit(event_test::create(this));
     priv->start();
   }
 

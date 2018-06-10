@@ -5,11 +5,13 @@
 #include <particledi.hpp>
 
 #include "ircsocket_base.hpp"
+#include "event.hpp"
 
 namespace pb2 {
 
   class bot_private;
   class ircsocket;
+  class event;
 
   class bot : public particledi::dependency {
   public:
@@ -22,11 +24,15 @@ namespace pb2 {
 
     std::optional<ircsocket_base::ptr>
     get_socket(std::string& name);
-
+     
+    void emit(std::shared_ptr<event> e);
+    
     void start();
     
   private:
     std::shared_ptr<bot_private> priv;
   };
+  
+  typedef bot* bot_ptr;
 
 }

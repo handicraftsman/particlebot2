@@ -123,3 +123,7 @@ std::string pb2::ircstream::ctcp(std::string target, std::string type, std::stri
 std::string pb2::ircstream::nctcp(std::string target, std::string type, std::string message) {
   return pb2::ircstream::notice(target, "\x01" + type + " " + message + "\x01");
 }
+
+std::string pb2::ircstream::who(std::string channel) {
+  return ("WHO " + channel + "\r\n");
+}

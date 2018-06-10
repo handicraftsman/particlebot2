@@ -30,6 +30,7 @@ namespace pb2 {
     virtual ~ircsocket();
 
     virtual ircstream stream();
+    virtual void flushq();
 
   protected:
     virtual void connect();
