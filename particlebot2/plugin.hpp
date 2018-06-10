@@ -57,7 +57,7 @@ namespace pb2 {
   };
 }
 
-#define pb2_ptrcast std::dynamic_pointer_cast
+#define pb2_ptrcast std::reinterpret_pointer_cast
 
 extern "C" {
   extern pb2::plugin* pb2_plugin;

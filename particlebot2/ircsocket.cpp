@@ -14,6 +14,8 @@
 #include <unistd.h>
 
 #include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 #include <guosh.hpp>
 
@@ -100,9 +102,7 @@ namespace pb2 {
     if (addr_pos >= cfg.addresses.size()) {
       addr_pos = 0;
     }
-    config_address_t addr = cfg.addresses[addr_pos];
-    ++addr_pos;
-    return addr;
+    return cfg.addresses[addr_pos++];
   }
   
   void ircsocket_private::connect() {
@@ -180,6 +180,16 @@ namespace pb2 {
     return -2;
   }
   
+  static bool readable(int fd) {
+    char c;
+    int ret = ::recv(fd, &c, 1, MSG_PEEK);
+    if (ret == 0 || (ret < 1 && errno != EAGAIN)) {
+      return false;
+    } else {
+      return true;    
+    }
+  }
+  
   void ircsocket_private::read_loop() {
     while (true) {
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -188,6 +198,10 @@ namespace pb2 {
       
       if (running) {
         try {
+          if (!readable(conn)) {
+            throw std::runtime_error("disconnected");
+          }
+          
           char buf[513];
           int ok = read_line(conn, buf);
           if (ok < 0 && ok != -10) {
@@ -227,39 +241,38 @@ namespace pb2 {
       
       if (running) {
         try {
-           if (burst >= 5) {
-             std::this_thread::sleep_for(std::chrono::milliseconds(700));
-           } else {
-             ++burst;
-           }
-           auto current_time = std::chrono::system_clock::now();
-           if (current_time - last_write >= std::chrono::milliseconds(700)) {
-             burst = 0;
-           }
-           if (!q.empty()) {
+          if (burst >= 5) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(700));
+          } else {
+            ++burst;
+          }
+          auto current_time = std::chrono::system_clock::now();
+          if (current_time - last_write >= std::chrono::milliseconds(700)) {
+            burst = 0;
+          }
+          if (!q.empty()) {
+            std::string to_write; 
+            if (wrote == true) {
+              popped = q.front();
+              q.pop();
+            }
              
-             std::string to_write; 
-             if (wrote == true) {
-               popped = q.front();
-               q.pop();  
-             }
+            int ok = ::write(conn, popped.c_str(), popped.size());
+            if (ok < 1) {
+              if (errno == EAGAIN) {
+                wrote = false;
+              } else {
+                throw std::runtime_error("unable to write");
+              }
+            } else {
+              std::string::size_type pos = 0;
+              while ((pos = popped.find("\r\n", pos)) != std::string::npos) {
+                popped.erase(pos, 2);
+              }
+              l.io("W> " + popped);
+            }
              
-             int ok = ::write(conn, popped.c_str(), popped.size());
-             if (ok < 1) {
-               if (errno == EAGAIN) {
-                 wrote = false;
-               } else {
-                 throw std::runtime_error("unable to write");
-               }
-             } else {
-               std::string::size_type pos = 0;
-               while ((pos = popped.find("\r\n", pos)) != std::string::npos) {
-                 popped.erase(pos, 2);
-               }
-               l.io("W> " + popped);
-             }
-             
-             last_write = current_time;
+            last_write = current_time;
           }
         } catch (std::exception& exc) {
           char* exc_name = abi::__cxa_demangle(typeid(exc).name(), nullptr, nullptr, nullptr);

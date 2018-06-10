@@ -1,5 +1,8 @@
 #include "../particlebot2.hpp"
 
+#include <functional>
+#include <thread>
+
 extern "C" {
 
   pb2::plugin* pb2_plugin;
@@ -14,7 +17,7 @@ extern "C" {
     
     pb2_plugin->register_event_handler<pb2::event_disconnect>([] (pb2::event::ptr _e) {
       pb2::event_disconnect::ptr e = pb2_ptrcast<pb2::event_disconnect>(_e);
-      // reconnect
+      std::thread(std::bind(&pb2::ircsocket_base::connect, e->socket)).detach();
     });
   }
   

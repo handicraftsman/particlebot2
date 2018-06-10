@@ -24,9 +24,9 @@ namespace pb2 {
     virtual ircstream stream() = 0;
     virtual void flushq() = 0;
 
-  protected:
     virtual void connect() = 0;
 
+  protected:
     virtual void enqueue(std::string& msg) = 0;
   };
 
