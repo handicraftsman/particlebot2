@@ -74,7 +74,9 @@ namespace pb2 {
           handler(e);
         } catch (std::exception& exc) {
           char* exc_name = abi::__cxa_demangle(typeid(exc).name(), nullptr, nullptr, nullptr);
-          l.error("Exception: %s (%s)\n\tin %s handler", exc_name, exc.what(), id.c_str());
+          char* did = abi::__cxa_demangle(id.c_str(), nullptr, nullptr, nullptr);
+          l.error("Exception: %s (%s)\n\tin %s handler", exc_name, exc.what(), did);
+          free(did);
           free(exc_name);
         }
       });

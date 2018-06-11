@@ -2,3 +2,5 @@
 .vscode
 build/
 particlebot2.ini
+particlebot2.kdev4
+.kdev4/

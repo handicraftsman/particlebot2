@@ -124,6 +124,18 @@ std::string pb2::ircstream::nctcp(std::string target, std::string type, std::str
   return pb2::ircstream::notice(target, "\x01" + type + " " + message + "\x01");
 }
 
+std::string pb2::ircstream::join(std::string channel) {
+  return ("JOIN " + channel + "\r\n");
+}
+
+std::string pb2::ircstream::join(std::string channel, std::string password) {
+  return ("JOIN " + channel + " " + password + "\r\n");
+}
+
+std::string pb2::ircstream::part(std::string channel, std::string reason) {
+  return ("PART " + channel + " :" + reason + "\r\n");
+}
+
 std::string pb2::ircstream::who(std::string channel) {
   return ("WHO " + channel + "\r\n");
 }

@@ -53,6 +53,8 @@ namespace pb2 {
 
     void enqueue(std::string& msg);
 
+    void autojoin();
+
     ircsocket& pub;
 
     std::weak_ptr<particledi::dm> dm;
@@ -143,7 +145,7 @@ namespace pb2 {
           stream << ircstream::auth_pass(cfg.pass.value());
         }
         stream << ircstream::nick(cfg.nick);
-        stream << ircstream::auth_user(cfg.nick, cfg.rnam);
+        stream << ircstream::auth_user(cfg.user, cfg.rnam);
       }
       
       running = true;
@@ -216,6 +218,8 @@ namespace pb2 {
             }
             
             l.io("R> %s", msg.c_str());
+            std::shared_ptr<bot> b = dm.lock()->get<bot>();
+            b->emit(event_message::create(b.get(), &pub, msg));
           }
         } catch (std::exception& exc) {
           char* exc_name = abi::__cxa_demangle(typeid(exc).name(), nullptr, nullptr, nullptr);
@@ -292,6 +296,13 @@ namespace pb2 {
     q.push(msg);
   }
 
+  void ircsocket_private::autojoin() {
+    auto s = pub.stream();
+    for (std::string channel : cfg.autojoin) {
+      s << pb2::ircstream::join(channel);
+    }
+  }
+
   /*
    * Public implementation
    */
@@ -325,6 +336,10 @@ namespace pb2 {
   void ircsocket::flushq() {
     std::queue<std::string> q;
     std::swap(priv->q, q);
+  }
+  
+  void ircsocket::autojoin() {
+    priv->autojoin();
   }
 
 }

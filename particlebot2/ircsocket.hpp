@@ -32,9 +32,11 @@ namespace pb2 {
     virtual ircstream stream();
     virtual void flushq();
 
-  protected:
     virtual void connect();
 
+    virtual void autojoin();
+
+  protected:
     virtual void enqueue(std::string& msg);
 
   private:

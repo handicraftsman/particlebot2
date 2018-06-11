@@ -16,8 +16,9 @@ find_package(PkgConfig REQUIRED)
 pkg_search_module(Guosh REQUIRED guosh>=0.4.0)
 pkg_search_module(PDI REQUIRED particledi>=0.3.0)
 pkg_search_module(PINI REQUIRED particleini)
-set(PB2_LIBRARIES ${Guosh_LIBRARIES} ${PDI_LIBRARIES} ${PINI_LIBRARIES} dl pthread)
-set(PB2_INCLUDE_DIRS ${Guosh_INCLUDE_DIRS} ${PDI_INCLUDE_DIRS} ${PINI_INCLUDE_DIRS})
+pkg_search_module(SQLite REQUIRED sqlite3)
+set(PB2_LIBRARIES ${Guosh_LIBRARIES} ${PDI_LIBRARIES} ${PINI_LIBRARIES} ${SQLite_LIBRARIES} dl pthread)
+set(PB2_INCLUDE_DIRS ${Guosh_INCLUDE_DIRS} ${PDI_INCLUDE_DIRS} ${PINI_INCLUDE_DIRS} ${SQLite_INCLUDE_DIRS})
 
 
 file(GLOB pb2_SRC particlebot2/*.cpp)

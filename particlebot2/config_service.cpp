@@ -91,6 +91,7 @@ pb2::config_service::~config_service() {}
 
 pb2::config_t pb2::config_service::get_config() {
   pb2::config_t cfg;
+  cfg.prefix = "!";
 
   particleini::config ini(path);
 

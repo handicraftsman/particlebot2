@@ -125,5 +125,9 @@ namespace pb2 {
     emit(event_test::create(this));
     priv->start();
   }
+  
+  std::string bot::get_prefix() {
+    return priv->prefix;  
+  }
 
 }

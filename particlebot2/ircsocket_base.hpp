@@ -25,6 +25,8 @@ namespace pb2 {
     virtual void flushq() = 0;
 
     virtual void connect() = 0;
+    
+    virtual void autojoin() = 0;
 
   protected:
     virtual void enqueue(std::string& msg) = 0;

@@ -29,6 +29,8 @@ namespace pb2 {
     
     void start();
     
+    std::string get_prefix();
+    
   private:
     std::shared_ptr<bot_private> priv;
   };
