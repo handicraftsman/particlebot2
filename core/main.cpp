@@ -124,7 +124,7 @@ extern "C" {
     pb2_plugin->register_event_handler<pb2::event_ctcp>([] (pb2::event::ptr _e) {
       pb2::event_ctcp::ptr e = pb2_ptrcast<pb2::event_ctcp>(_e);
       if (e->type == "VERSION") {
-        e->socket->stream() << pb2::ircstream::nctcp(e->nick, "VERSION", "ParticleBot2 - An IRC bot in C++ - https://github.com/handicraftsan/particlebot2/");
+        e->socket->stream() << pb2::ircstream::nctcp(e->nick, "VERSION", "ParticleBot2 - An IRC bot in C++ - https://github.com/handicraftsman/particlebot2/");
       }
     });
     
@@ -141,6 +141,27 @@ extern "C" {
       }
     });
     
+    pb2_plugin->register_event_handler<pb2::event_command>([] (pb2::event::ptr _e) {
+      pb2::event_command::ptr e = pb2_ptrcast<pb2::event_command>(_e);
+      
+      particledi::dm_ptr dm = e->pbot->get_dm();
+      std::shared_ptr<pb2::plugin_service> pl_s = dm->get<pb2::plugin_service>();
+      
+      pl_s->handle_command(e);
+    });
+    
+    pb2::command cmd_ping = {
+      .pplugin     = pb2_plugin,
+      .name        = "ping",
+      .usage       = "",
+      .description = "Ping!",
+      .cooldown    = 10,
+      .flag        = "world",
+      .handler     = [pb2_plugin] (pb2::command& c, pb2::event_command::ptr e) {
+        e->socket->stream() << pb2::ircstream::reply(e, "pong");
+      }
+    };
+    pb2_plugin->register_command(cmd_ping);
   }
   
   void pb2_deinit() {

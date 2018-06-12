@@ -35,12 +35,17 @@ namespace pb2 {
     virtual void connect();
 
     virtual void autojoin();
+    
+    virtual std::string get_name();
+    
+    virtual config_server_t& get_config();
 
   protected:
     virtual void enqueue(std::string& msg);
 
   private:
     std::shared_ptr<ircsocket_private> priv;
+    std::string name;
   };
 
 }

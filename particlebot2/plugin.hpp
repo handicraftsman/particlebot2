@@ -16,10 +16,37 @@
 
 namespace pb2 {
   class plugin_service;
+  class plugin;
   class plugin_private;
 
   typedef std::function<void(event::ptr)> event_handler;
 
+  struct command {
+    typedef std::function<void(command& c, event_command::ptr e)> handler_t;
+    
+    command();
+    command(
+      plugin*     pplugin,
+      std::string name,
+      std::string usage,
+      std::string description,
+      int         cooldown,
+      std::string flag,
+      handler_t   handler
+    );
+    
+    void handle(event_command::ptr e);
+    
+    plugin* pplugin;
+    std::string name;
+    std::string usage;
+    std::string description;
+    int cooldown;
+    std::string flag;
+    
+    handler_t handler;
+  };
+  
   class plugin {
   public:
     typedef std::shared_ptr<plugin> ptr;
@@ -42,6 +69,10 @@ namespace pb2 {
       l.debug("Registered an event handler for %s", n);
       free(n);
     }
+    
+    void register_command(command& c);
+    
+    bool handle_command(event_command::ptr e);
 
     std::string name;
 
@@ -54,6 +85,7 @@ namespace pb2 {
     std::shared_ptr<void> handle;
     
     std::map<std::string, std::optional<event_handler>> event_handlers;
+    std::map<std::string, command> commands;
   };
 }
 

@@ -5,6 +5,8 @@
 
 #include <dlfcn.h>
 
+#include "db_service.hpp"
+
 static std::string find_path_to_plugin(std::string name) {
   const std::vector<std::string> paths {
     "./libpb2-" + name + ".so",
@@ -24,6 +26,46 @@ typedef void (*deinit_func)();
 
 namespace pb2 {
 
+  command::command()
+  : name("<unknown>")
+  , usage("")
+  , description("<none>")
+  , cooldown(0)
+  , flag("world")
+  , handler([] (command& c, event_command::ptr e) {})
+  {}
+  
+  command::command(
+    plugin*     _pplugin,
+    std::string _name,
+    std::string _usage,
+    std::string _description,
+    int         _cooldown,
+    std::string _flag,
+    handler_t   _handler
+  )
+  : pplugin(_pplugin)
+  , name(_name)
+  , usage(_usage)
+  , description(_description)
+  , cooldown(_cooldown)
+  , flag(_flag)
+  , handler(_handler)
+  {}
+  
+  void command::handle(event_command::ptr e) {
+    particledi::dm_ptr dm = e->pbot->get_dm();
+    std::shared_ptr<db_service> db_s = dm->get<db_service>();
+    pb2::flag f(e->socket->get_name());
+    f.channel = e->target;
+    f.host    = e->host;
+    f.plugin  = pplugin->name;
+    f.name    = flag;
+    if (db_s->check(f)) {
+      handler(*this, e);
+    }
+  }
+  
   plugin::plugin(std::string& name, std::vector<std::pair<std::string, std::string>>& cfg)
   : handle(nullptr)
   , l("?" + name)
@@ -82,5 +124,21 @@ namespace pb2 {
       });
     }
   }
+  
+  void plugin::register_command(command& c) {
+    commands[c.name] = c;
+    l.debug("Registered the %s command", c.name.c_str());
+  }
 
+  bool plugin::handle_command(event_command::ptr e) {
+    if (commands.find(e->cmd) != commands.end()) {
+      command& c = commands[e->cmd];
+      
+      c.handle(e);
+      
+      return true;
+    }
+    return false;
+  }
+  
 }

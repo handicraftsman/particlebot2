@@ -36,6 +36,20 @@ namespace pb2 {
 
     static std::string who(std::string channel);
 
+    template<class E>
+    static std::string reply(E e, std::string message) {
+      if (e->target == e->socket->get_config().nick) {
+        return privmsg(e->nick, message);
+      } else {
+        return privmsg(e->target, message);
+      }
+    }
+    
+    template<class E>
+    static std::string nreply(E e, std::string message) {
+      return notice(e->nick, message);
+    }
+    
   protected:
     std::streambuf::int_type overflow(std::streambuf::int_type c);
 

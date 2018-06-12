@@ -28,5 +28,11 @@ namespace pb2 {
       p.second->emit(e);
     }
   }
+  
+  void plugin_service::handle_command(event_command::ptr e) {
+    for (std::pair<std::string, plugin::ptr> p : plugins) {
+      p.second->handle_command(e);
+    }
+  }
 
 }

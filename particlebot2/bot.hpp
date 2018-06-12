@@ -31,6 +31,8 @@ namespace pb2 {
     
     std::string get_prefix();
     
+    particledi::dm_ptr get_dm();
+    
   private:
     std::shared_ptr<bot_private> priv;
   };

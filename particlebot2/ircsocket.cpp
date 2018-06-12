@@ -307,8 +307,9 @@ namespace pb2 {
    * Public implementation
    */
 
-  ircsocket::ircsocket(std::weak_ptr<particledi::dm> dm, std::string name, config_server_t& cfg)
-  : priv(new ircsocket_private(*this, dm, name, cfg))
+  ircsocket::ircsocket(std::weak_ptr<particledi::dm> dm, std::string _name, config_server_t& cfg)
+  : priv(new ircsocket_private(*this, dm, _name, cfg))
+  , name(_name)
   {
     priv->l.debug("Initialized pb2::ircsocket and pb2::ircsocket_private");
   }
@@ -341,5 +342,13 @@ namespace pb2 {
   void ircsocket::autojoin() {
     priv->autojoin();
   }
+  
+  std::string ircsocket::get_name() {
+    return name;
+  }
 
+  config_server_t& ircsocket::get_config() {
+    return priv->cfg;
+  }
+  
 }

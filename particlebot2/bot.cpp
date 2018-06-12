@@ -129,5 +129,9 @@ namespace pb2 {
   std::string bot::get_prefix() {
     return priv->prefix;  
   }
+  
+  particledi::dm_ptr bot::get_dm() {
+    return priv->dm_weak.lock();
+  }
 
 }

@@ -1,7 +1,9 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
+#include "config.hpp"
 #include "ircstream.hpp"
 
 namespace pb2 {
@@ -27,7 +29,11 @@ namespace pb2 {
     virtual void connect() = 0;
     
     virtual void autojoin() = 0;
+    
+    virtual std::string get_name() = 0;
 
+    virtual config_server_t& get_config() = 0;
+    
   protected:
     virtual void enqueue(std::string& msg) = 0;
   };
