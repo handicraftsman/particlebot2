@@ -87,14 +87,14 @@ namespace pb2 {
 
     Guosh::Logger l;
 
+    std::map<std::string, std::optional<event_handler>> event_handlers;
+    std::map<std::string, command> commands;
+    
   protected:
     void emit(event::ptr e);
 
   private:
     std::shared_ptr<void> handle;
-    
-    std::map<std::string, std::optional<event_handler>> event_handlers;
-    std::map<std::string, command> commands;
   };
 }
 

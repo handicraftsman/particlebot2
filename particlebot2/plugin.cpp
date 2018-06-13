@@ -59,12 +59,15 @@ namespace pb2 {
       throw std::runtime_error("pplugin field is null in " + name);
     }
     
-    auto current = std::chrono::system_clock::now();
     std::tuple tpl { e->socket->get_name(), e->target, e->host };
-    if (last_uses.find(tpl) != last_uses.end()) {
-      auto last = last_uses[tpl];
-      if ((current - last) < std::chrono::seconds(cooldown)) {
-        return;
+    auto current = std::chrono::system_clock::now();
+    
+    if (cooldown != 0) {
+      if (last_uses.find(tpl) != last_uses.end()) {
+        auto last = last_uses[tpl];
+        if ((current - last) < std::chrono::seconds(cooldown)) {
+          return;
+        }
       }
     }
     

@@ -25,14 +25,12 @@ namespace pb2 {
 
     std::optional<plugin::ptr> get(std::string& name);
 
-    void emit(event::ptr e);
-    
-    void handle_command(event_command::ptr e);
-
-  protected:
     void load_plugin(std::string& name, std::vector<std::pair<std::string, std::string>>& cfg);
+    
+    void emit(event::ptr e);
 
-  private:
+    void handle_command(event_command::ptr e);
+    
     std::map<std::string, plugin::ptr> plugins;
   };
 }

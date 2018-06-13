@@ -3,6 +3,7 @@
 #include <optional>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <particledi.hpp>
 
@@ -30,6 +31,7 @@ namespace pb2 {
     bool check(flag& f);
     void insert(flag& f);
     void remove(flag& f);
+    std::vector<flag> list(flag& f);
 
   private:    
     std::shared_ptr<db_service_private> priv;
