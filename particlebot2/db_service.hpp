@@ -31,7 +31,7 @@ namespace pb2 {
     void insert(flag& f);
     void remove(flag& f);
 
-  private:
+  private:    
     std::shared_ptr<db_service_private> priv;
   };
 

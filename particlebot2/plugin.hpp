@@ -1,8 +1,10 @@
 #pragma once
 
+#include <chrono>
 #include <functional>
-#include <typeinfo>
 #include <string>
+#include <tuple>
+#include <typeinfo>
 #include <map>
 #include <memory>
 #include <optional>
@@ -23,6 +25,9 @@ namespace pb2 {
 
   struct command {
     typedef std::function<void(command& c, event_command::ptr e)> handler_t;
+    typedef std::string server_name_t;
+    typedef std::string channel_name_t;
+    typedef std::string host_name_t;
     
     command();
     command(
@@ -36,15 +41,19 @@ namespace pb2 {
     );
     
     void handle(event_command::ptr e);
-    
+        
     plugin* pplugin;
     std::string name;
     std::string usage;
     std::string description;
     int cooldown;
     std::string flag;
-    
     handler_t handler;
+    
+    std::map<
+      std::tuple<server_name_t, channel_name_t, host_name_t>,
+      std::chrono::time_point<std::chrono::system_clock>
+    > last_uses;
   };
   
   class plugin {

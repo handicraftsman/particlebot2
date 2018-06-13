@@ -27,7 +27,8 @@ typedef void (*deinit_func)();
 namespace pb2 {
 
   command::command()
-  : name("<unknown>")
+  : pplugin(nullptr)
+  , name("<unknown>")
   , usage("")
   , description("<none>")
   , cooldown(0)
@@ -54,20 +55,37 @@ namespace pb2 {
   {}
   
   void command::handle(event_command::ptr e) {
+    if (pplugin == nullptr) {
+      throw std::runtime_error("pplugin field is null in " + name);
+    }
+    
+    auto current = std::chrono::system_clock::now();
+    std::tuple tpl { e->socket->get_name(), e->target, e->host };
+    if (last_uses.find(tpl) != last_uses.end()) {
+      auto last = last_uses[tpl];
+      if ((current - last) < std::chrono::seconds(cooldown)) {
+        return;
+      }
+    }
+    
     particledi::dm_ptr dm = e->pbot->get_dm();
     std::shared_ptr<db_service> db_s = dm->get<db_service>();
+    
     pb2::flag f(e->socket->get_name());
     f.channel = e->target;
     f.host    = e->host;
     f.plugin  = pplugin->name;
     f.name    = flag;
+    
     if (db_s->check(f)) {
+      last_uses[tpl] = current;
       handler(*this, e);
     }
   }
   
-  plugin::plugin(std::string& name, std::vector<std::pair<std::string, std::string>>& cfg)
+  plugin::plugin(std::string& _name, std::vector<std::pair<std::string, std::string>>& cfg)
   : handle(nullptr)
+  , name(_name)
   , l("?" + name)
   {
     std::string path = find_path_to_plugin(name);
