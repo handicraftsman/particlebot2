@@ -11,7 +11,9 @@ static std::string find_path_to_plugin(std::string name) {
   const std::vector<std::string> paths {
     "./libpb2-" + name + ".so",
     "/usr/share/libpb2-" + name + ".so",
-    "/usr/local/share/libpb2-" + name + ".so"
+    "/usr/lib/libpb2-" + name + ".so",
+    "/usr/local/share/libpb2-" + name + ".so",
+    "/usr/local/lib/libpb2-" + name + ".so"
   };
 
   for (std::string path : paths)
