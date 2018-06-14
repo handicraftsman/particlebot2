@@ -33,6 +33,8 @@ namespace pb2 {
     
     particledi::dm_ptr get_dm();
     
+    std::map<std::string, config_group_t> get_groups();
+    
   private:
     std::shared_ptr<bot_private> priv;
   };

@@ -21,6 +21,9 @@ set(PB2_LIBRARIES ${Guosh_LIBRARIES} ${PDI_LIBRARIES} ${PINI_LIBRARIES} ${SQLite
 set(PB2_INCLUDE_DIRS ${Guosh_INCLUDE_DIRS} ${PDI_INCLUDE_DIRS} ${PINI_INCLUDE_DIRS} ${SQLite_INCLUDE_DIRS})
 
 
+pkg_search_module(CURL libcurl)
+
+
 file(GLOB pb2_SRC particlebot2/*.cpp)
 add_library(libparticlebot2 SHARED ${pb2_SRC})
 target_link_libraries(libparticlebot2 ${PB2_LIBRARIES})
@@ -32,6 +35,22 @@ add_library(pb2-core SHARED ${pb2_core_SRC})
 target_link_libraries(pb2-core libparticlebot2 ${PB2_LIBRARIES})
 target_include_directories(pb2-core PRIVATE . ${PB2_INCLUDE_DIRS})
 
+file(GLOB pb2_chanop_SRC chanop/*.cpp)
+add_library(pb2-chanop SHARED ${pb2_chanop_SRC})
+target_link_libraries(pb2-chanop libparticlebot2 ${PB2_LIBRARIES})
+target_include_directories(pb2-chanop PRIVATE . ${PB2_INCLUDE_DIRS})
+
+if (CURL_FOUND)
+  file(GLOB pb2_titler_SRC titler/*.cpp)
+  add_library(pb2-titler SHARED ${pb2_titler_SRC})
+  target_link_libraries(pb2-titler libparticlebot2 ${PB2_LIBRARIES} ${CURL_LIBRARIES})
+  target_include_directories(pb2-titler PRIVATE . ${PB2_INCLUDE_DIRS} ${CURL_INCLUDE_DIRS})
+  install(
+    TARGETS pb2-titler
+    LIBRARY DESTINATION lib
+  )
+endif()
+
 add_executable(particlebot2 main.cpp)
 target_link_libraries(particlebot2 libparticlebot2 ${PB2_LIBRARIES})
 target_include_directories(particlebot2 PRIVATE ${PB2_INCLUDE_DIRS})
@@ -42,7 +61,7 @@ install(FILES ${CMAKE_BINARY_DIR}/particlebot2.pc DESTINATION lib/pkgconfig)
 
 
 install(
-  TARGETS particlebot2 libparticlebot2 pb2-core
+  TARGETS particlebot2 libparticlebot2 pb2-core pb2-core
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
 )

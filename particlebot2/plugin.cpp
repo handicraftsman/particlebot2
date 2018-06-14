@@ -93,7 +93,7 @@ namespace pb2 {
   {
     std::string path = find_path_to_plugin(name);
     
-    void* h = dlopen(path.c_str(), RTLD_LAZY);
+    void* h = dlopen(path.c_str(), RTLD_LAZY | RTLD_LOCAL);
     if (!h) {
       throw std::runtime_error(std::string(dlerror()));
     }

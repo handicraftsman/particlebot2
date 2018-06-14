@@ -39,6 +39,8 @@ namespace pb2 {
     virtual std::string get_name();
     
     virtual config_server_t& get_config();
+    
+    virtual std::map<std::string, user>& get_user_cache();
 
   protected:
     virtual void enqueue(std::string& msg);

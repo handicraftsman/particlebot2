@@ -44,6 +44,7 @@ namespace pb2 {
     std::string prefix;
 
     std::map<std::string, ircsocket_base::ptr> sockets;
+    std::map<std::string, config_group_t> groups;
   };
 
   /*
@@ -63,6 +64,7 @@ namespace pb2 {
     config_t cfg = config_s->get_config();
 
     prefix = cfg.prefix;
+    groups = cfg.groups;
 
     for (std::pair<std::string, config_plugin_t> sp : cfg.plugins) {
       pl_s->load_plugin(sp.first, sp.second.config);
@@ -132,6 +134,10 @@ namespace pb2 {
   
   particledi::dm_ptr bot::get_dm() {
     return priv->dm_weak.lock();
+  }
+  
+  std::map<std::string, config_group_t> bot::get_groups() {
+    return priv->groups;
   }
 
 }

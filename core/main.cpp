@@ -5,6 +5,8 @@
 #include <sstream>
 #include <thread>
 
+using namespace std::placeholders;
+
 template<typename Out>
 static void split_str(const std::string& s, char delim, Out result) {
   std::stringstream ss(s);
@@ -98,12 +100,57 @@ extern "C" {
       pb2::event_code::ptr e = pb2_ptrcast<pb2::event_code>(_e);
       if (e->code == 1) {
         e->socket->autojoin();
+      } else if (e->code == 352) {
+        static std::regex regex_whoreply("^.+? (.+?) (.+?) .+? (.+?) .*");
+        auto m = std::smatch {};
+        if (std::regex_match(e->extra, m, regex_whoreply)) {
+          std::string nick = m[3], user = m[1], host = m[2];
+          e->pbot->emit(pb2::event_whoreply::create(e->pbot, e->socket, nick, user, host));
+        }
       }
+    });
+    
+    pb2_plugin->register_event_handler<pb2::event_whoreply>([] (pb2::event::ptr _e) {
+      pb2::event_whoreply::ptr e = pb2_ptrcast<pb2::event_whoreply>(_e);
+      auto uc = e->socket->get_user_cache();
+      uc[e->nick].nick = e->nick;
+      uc[e->nick].user = e->user;
+      uc[e->nick].host = e->host;
+    });
+    
+    pb2_plugin->register_event_handler<pb2::event_nick>([] (pb2::event::ptr _e) {
+      pb2::event_nick::ptr e = pb2_ptrcast<pb2::event_nick>(_e);
+      if (e->nick == e->socket->get_config().nick) {
+        e->socket->get_config().nick = e->nick;
+      }
+      auto uc = e->socket->get_user_cache();
+      uc[e->new_nick].nick = e->new_nick;
+      uc[e->new_nick].user = e->user;
+      uc[e->new_nick].host = e->host;
+      uc[e->nick] = pb2::user();
+    });
+    
+    pb2_plugin->register_event_handler<pb2::event_join>([] (pb2::event::ptr _e) {
+      pb2::event_join::ptr e = pb2_ptrcast<pb2::event_join>(_e);
+      
+      if (e->nick == e->socket->get_config().nick) {
+        e->socket->stream() << pb2::ircstream::who(e->channel);
+      }
+      
+      auto uc = e->socket->get_user_cache();
+      uc[e->nick].nick = e->nick;
+      uc[e->nick].user = e->user;
+      uc[e->nick].host = e->host;
     });
     
     pb2_plugin->register_event_handler<pb2::event_privmsg>([] (pb2::event::ptr _e) {
       pb2::event_privmsg::ptr e = pb2_ptrcast<pb2::event_privmsg>(_e);
     
+      auto uc = e->socket->get_user_cache();
+      uc[e->nick].nick = e->nick;
+      uc[e->nick].user = e->user;
+      uc[e->nick].host = e->host;
+      
       std::string prefix = e->pbot->get_prefix();
       if (e->message.size() > prefix.size() && e->message.substr(0, prefix.size()) == prefix) {
         std::string message = e->message.substr(prefix.size(), e->message.size()-1);
@@ -131,6 +178,11 @@ extern "C" {
     pb2_plugin->register_event_handler<pb2::event_notice>([] (pb2::event::ptr _e) {
       pb2::event_notice::ptr e = pb2_ptrcast<pb2::event_notice>(_e);
       
+      auto uc = e->socket->get_user_cache();
+      uc[e->nick].nick = e->nick;
+      uc[e->nick].user = e->user;
+      uc[e->nick].host = e->host;
+      
       if (e->message[0] == '\x01' && e->message[e->message.size()-1] == '\x01') {
         std::string message = e->message.substr(1, e->message.size()-2);
         std::vector<std::string> split = split_str(message, ' ');
@@ -154,7 +206,7 @@ extern "C" {
       .pplugin     = pb2_plugin,
       .name        = "ping",
       .usage       = "",
-      .description = "Ping!",
+      .description = "ping!",
       .cooldown    = 10,
       .flag        = "world",
       .handler     = [] (pb2::command& c, pb2::event_command::ptr e) {
@@ -162,6 +214,65 @@ extern "C" {
       }
     };
     pb2_plugin->register_command(cmd_ping);
+    
+    pb2::command cmd_nick {
+      .pplugin     = pb2_plugin,
+      .name        = "nick",
+      .usage       = "<new-nickname>",
+      .description = "changes nickname",
+      .cooldown    = 0,
+      .flag        = "nick",
+      .handler     = [] (pb2::command& c, pb2::event_command::ptr e) {
+        if (e->split.size() != 2) {
+          e->socket->stream() << pb2::ircstream::nreply(e, "Invalid arguments!");
+          return;
+        }
+        e->socket->stream() << pb2::ircstream::nick(e->split[1]);
+      }
+    };
+    pb2_plugin->register_command(cmd_nick);
+    
+    pb2::command cmd_join {
+      .pplugin     = pb2_plugin,
+      .name        = "join",
+      .usage       = "<channel> [password]",
+      .description = "joins channels",
+      .cooldown    = 0,
+      .flag        = "joinpart",
+      .handler     = [] (pb2::command& c, pb2::event_command::ptr e) {
+        if (e->split.size() == 2) {
+          e->socket->stream() << pb2::ircstream::join(e->split[1]);
+        } else if (e->split.size() == 3) {
+          e->socket->stream() << pb2::ircstream::join(e->split[1], e->split[2]);
+        } else {
+          e->socket->stream() << pb2::ircstream::nreply(e, "Invalid arguments!");
+        }
+      }
+    };
+    pb2_plugin->register_command(cmd_join);
+    
+    pb2::command cmd_part {
+      .pplugin     = pb2_plugin,
+      .name        = "part",
+      .usage       = "<channel> [password]",
+      .description = "parts (leaves) channels",
+      .cooldown    = 0,
+      .flag        = "joinpart",
+      .handler     = [] (pb2::command& c, pb2::event_command::ptr e) {
+        if (e->split.size() == 2) {
+          e->socket->stream() << pb2::ircstream::part(e->split[1]);
+        } else if (e->split.size() > 2) {
+          std::stringstream reason;
+          for (int i = 2; i < e->split.size(); ++i) {
+            reason << e->split[i] << " ";
+          }
+          e->socket->stream() << pb2::ircstream::part(e->split[1], reason.str());
+        } else {
+          e->socket->stream() << pb2::ircstream::nreply(e, "Invalid arguments!");
+        }
+      }
+    };
+    pb2_plugin->register_command(cmd_part);
     
     pb2::command cmd_key {
       .pplugin     = pb2_plugin,
@@ -399,6 +510,188 @@ extern "C" {
     };
     pb2_plugin->register_command(cmd_flag_takeh);
     
+    auto group_handler = [] (pb2::command& c, pb2::event_command::ptr e) {
+      std::map<std::string, pb2::config_group_t> groups = e->pbot->get_groups();
+      
+      if (c.name == "group-list") {
+        if (e->split.size() == 1) {
+          std::stringstream res;
+          res << "&BGroups:&N ";
+          for (std::pair<std::string, pb2::config_group_t> g : groups) {
+            res << g.first << " ";
+          }
+          e->socket->stream() << pb2::ircstream::nreply(e, res.str());
+        } else if (e->split.size() == 2) {
+          if (groups.find(e->split[1]) == groups.end()) {
+            e->socket->stream() << pb2::ircstream::nreply(e, "No such group!");
+            return;
+          }
+          pb2::config_group_t& group = groups[e->split[1]];
+          std::stringstream res;
+          res << "&B" << e->split[1] << ":&N ";
+          for (std::pair<std::string, std::string> p : group.flags) {
+            res << p.first << "/" << p.second << " ";
+          }
+          e->socket->stream() << pb2::ircstream::nreply(e, res.str());
+        } else {
+          e->socket->stream() << pb2::ircstream::nreply(e, "Invalid arguments!");
+        }
+      }
+    };
+    
+    enum class GroupManipWhat {
+      None,
+      Channel,
+      Hostname
+    };
+    
+    enum class GroupManipTask {
+      Give,
+      Take
+    };
+    
+    auto group_manip_handler = [] (
+      int args,
+      GroupManipWhat what,
+      GroupManipTask task,
+      pb2::command& c,
+      pb2::event_command::ptr e
+    ) {
+      particledi::dm_ptr dm = e->pbot->get_dm();
+      std::shared_ptr<pb2::db_service> db_s = dm->get<pb2::db_service>();
+      
+      std::map<std::string, pb2::config_group_t> groups = e->pbot->get_groups();
+      
+      std::optional<std::string> channel;
+      std::optional<std::string> host;
+      std::string gname;
+      
+      if (args == 1) {
+        if (what == GroupManipWhat::Channel) {
+          channel = e->split[1];
+        } else if (what == GroupManipWhat::Hostname) {
+          host = e->split[1];
+        }
+        gname = e->split[2];
+      } else if (args == 2) {
+        channel = e->split[1];
+        host    = e->split[2];
+        gname   = e->split[3];
+      } else {
+        e->socket->stream() << pb2::ircstream::nreply(e, "Invalid arguments!");
+        return;
+      }
+      
+      if (groups.find(gname) == groups.end()) {
+        e->socket->stream() << pb2::ircstream::nreply(e, "No such group!");
+        return;
+      }
+      
+      pb2::config_group_t& group = groups[gname];
+      
+      int n = 0;
+      if (task == GroupManipTask::Give) {
+        for (std::pair<std::string, std::string> p : group.flags) {
+          pb2::flag f(e->socket->get_name());
+          f.channel = channel;
+          f.host    = host;
+          f.plugin  = p.first;
+          f.name    = p.second;
+          db_s->insert(f);
+          ++n;
+        }
+      } else if (task == GroupManipTask::Take) {
+        for (std::pair<std::string, std::string> p : group.flags) {
+          pb2::flag f(e->socket->get_name());
+          f.channel = channel;
+          f.host    = host;
+          f.plugin  = p.first;
+          f.name    = p.second;
+          db_s->remove(f);
+          ++n;
+        }        
+      }
+      
+      e->socket->stream() << pb2::ircstream::nreply(e, "Done, " + std::to_string(n) + " flags modified!");
+    };
+    
+    pb2::command cmd_group_list {
+      .pplugin     = pb2_plugin,
+      .name        = "group-list",
+      .usage       = "| <group>",
+      .description = "lists groups and their flags",
+      .cooldown    = 0,
+      .flag        = "admin",
+      .handler     = group_handler
+    };
+    pb2_plugin->register_command(cmd_group_list);
+    
+    pb2::command cmd_group_give {
+      .pplugin     = pb2_plugin,
+      .name        = "group-give",
+      .usage       = "<channel> <hostname> <group>",
+      .description = "gives groups",
+      .cooldown    = 0,
+      .flag        = "admin",
+      .handler     = std::bind(group_manip_handler, 2, GroupManipWhat::None, GroupManipTask::Give, _1, _2)
+    };
+    pb2_plugin->register_command(cmd_group_give);
+    
+    pb2::command cmd_group_take {
+      .pplugin     = pb2_plugin,
+      .name        = "group-take",
+      .usage       = "<channel> <hostname> <group>",
+      .description = "takes groups",
+      .cooldown    = 0,
+      .flag        = "admin",
+      .handler     = std::bind(group_manip_handler, 2, GroupManipWhat::None, GroupManipTask::Take, _1, _2)
+    };
+    pb2_plugin->register_command(cmd_group_take);
+    
+    pb2::command cmd_group_givec {
+      .pplugin     = pb2_plugin,
+      .name        = "group-givec",
+      .usage       = "<channel> <group>",
+      .description = "gives given group to the given channel",
+      .cooldown    = 0,
+      .flag        = "admin",
+      .handler     = std::bind(group_manip_handler, 1, GroupManipWhat::Channel, GroupManipTask::Give, _1, _2)
+    };
+    pb2_plugin->register_command(cmd_group_givec);
+    
+    pb2::command cmd_group_takec {
+      .pplugin     = pb2_plugin,
+      .name        = "group-takec",
+      .usage       = "<channel> <group>",
+      .description = "takes given group from the given channel",
+      .cooldown    = 0,
+      .flag        = "admin",
+      .handler     = std::bind(group_manip_handler, 1, GroupManipWhat::Channel, GroupManipTask::Take, _1, _2)
+    };
+    pb2_plugin->register_command(cmd_group_takec);
+    
+    pb2::command cmd_group_giveh {
+      .pplugin     = pb2_plugin,
+      .name        = "group-giveh",
+      .usage       = "<hostname> <group>",
+      .description = "gives given group to the given hostname",
+      .cooldown    = 0,
+      .flag        = "admin",
+      .handler     = std::bind(group_manip_handler, 1, GroupManipWhat::Hostname, GroupManipTask::Give, _1, _2)
+    };
+    pb2_plugin->register_command(cmd_group_giveh);
+    
+    pb2::command cmd_group_takeh {
+      .pplugin     = pb2_plugin,
+      .name        = "group-takeh",
+      .usage       = "<hostname> <group>",
+      .description = "takes given group from the given hostname",
+      .cooldown    = 0,
+      .flag        = "admin",
+      .handler     = std::bind(group_manip_handler, 1, GroupManipWhat::Hostname, GroupManipTask::Take, _1, _2)
+    };
+    pb2_plugin->register_command(cmd_group_takeh);
+    
     pb2::command cmd_help {
       .pplugin = pb2_plugin,
       .name        = "help",
@@ -482,3 +775,4 @@ extern "C" {
   }
 
 }
+

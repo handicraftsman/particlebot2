@@ -75,6 +75,8 @@ namespace pb2 {
     std::queue<std::string> q;
     uint16_t burst;
     std::chrono::time_point<std::chrono::system_clock> last_write;
+    
+    std::map<std::string, user> user_cache;
   };
 
   /*
@@ -349,6 +351,10 @@ namespace pb2 {
 
   config_server_t& ircsocket::get_config() {
     return priv->cfg;
+  }
+  
+  std::map<std::string, user>& ircsocket::get_user_cache() {
+    return priv->user_cache;
   }
   
 }
