@@ -40,16 +40,10 @@ add_library(pb2-chanop SHARED ${pb2_chanop_SRC})
 target_link_libraries(pb2-chanop libparticlebot2 ${PB2_LIBRARIES})
 target_include_directories(pb2-chanop PRIVATE . ${PB2_INCLUDE_DIRS})
 
-if (CURL_FOUND)
-  file(GLOB pb2_titler_SRC titler/*.cpp)
-  add_library(pb2-titler SHARED ${pb2_titler_SRC})
-  target_link_libraries(pb2-titler libparticlebot2 ${PB2_LIBRARIES} ${CURL_LIBRARIES})
-  target_include_directories(pb2-titler PRIVATE . ${PB2_INCLUDE_DIRS} ${CURL_INCLUDE_DIRS})
-  install(
-    TARGETS pb2-titler
-    LIBRARY DESTINATION lib
-  )
-endif()
+file(GLOB pb2_fun_SRC fun/*.cpp)
+add_library(pb2-fun SHARED ${pb2_fun_SRC})
+target_link_libraries(pb2-fun libparticlebot2 ${PB2_LIBRARIES})
+target_include_directories(pb2-fun PRIVATE . ${PB2_INCLUDE_DIRS})
 
 add_executable(particlebot2 main.cpp)
 target_link_libraries(particlebot2 libparticlebot2 ${PB2_LIBRARIES})

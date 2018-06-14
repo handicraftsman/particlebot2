@@ -112,7 +112,7 @@ extern "C" {
     
     pb2_plugin->register_event_handler<pb2::event_whoreply>([] (pb2::event::ptr _e) {
       pb2::event_whoreply::ptr e = pb2_ptrcast<pb2::event_whoreply>(_e);
-      auto uc = e->socket->get_user_cache();
+      auto& uc = e->socket->get_user_cache();
       uc[e->nick].nick = e->nick;
       uc[e->nick].user = e->user;
       uc[e->nick].host = e->host;
@@ -123,7 +123,7 @@ extern "C" {
       if (e->nick == e->socket->get_config().nick) {
         e->socket->get_config().nick = e->nick;
       }
-      auto uc = e->socket->get_user_cache();
+      auto& uc = e->socket->get_user_cache();
       uc[e->new_nick].nick = e->new_nick;
       uc[e->new_nick].user = e->user;
       uc[e->new_nick].host = e->host;
@@ -137,7 +137,7 @@ extern "C" {
         e->socket->stream() << pb2::ircstream::who(e->channel);
       }
       
-      auto uc = e->socket->get_user_cache();
+      auto& uc = e->socket->get_user_cache();
       uc[e->nick].nick = e->nick;
       uc[e->nick].user = e->user;
       uc[e->nick].host = e->host;
@@ -146,7 +146,7 @@ extern "C" {
     pb2_plugin->register_event_handler<pb2::event_privmsg>([] (pb2::event::ptr _e) {
       pb2::event_privmsg::ptr e = pb2_ptrcast<pb2::event_privmsg>(_e);
     
-      auto uc = e->socket->get_user_cache();
+      auto& uc = e->socket->get_user_cache();
       uc[e->nick].nick = e->nick;
       uc[e->nick].user = e->user;
       uc[e->nick].host = e->host;
@@ -178,7 +178,7 @@ extern "C" {
     pb2_plugin->register_event_handler<pb2::event_notice>([] (pb2::event::ptr _e) {
       pb2::event_notice::ptr e = pb2_ptrcast<pb2::event_notice>(_e);
       
-      auto uc = e->socket->get_user_cache();
+      auto& uc = e->socket->get_user_cache();
       uc[e->nick].nick = e->nick;
       uc[e->nick].user = e->user;
       uc[e->nick].host = e->host;

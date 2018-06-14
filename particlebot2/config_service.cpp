@@ -32,6 +32,10 @@ static void add_server(
 ) {
   pb2::config_server_t server;
 
+  server.nick = "ParticleBot2";
+  server.user = "pb2";
+  server.rnam = "An IRC bot in C++";
+  
   for (std::pair<std::string, std::string> line : sect) {
     std::string& name = line.first;
     std::string& value = line.second;
