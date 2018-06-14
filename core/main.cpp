@@ -768,6 +768,38 @@ extern "C" {
       }
     };
     pb2_plugin->register_command(cmd_list);
+    
+    pb2::command cmd_raw {
+      .pplugin     = pb2_plugin,
+      .name        = "raw",
+      .usage       = "<message...>",
+      .description = "sends given message to the server",
+      .cooldown    = 0,
+      .flag        = "admin",
+      .handler     = [] (pb2::command& c, pb2::event_command::ptr e) {
+        std::stringstream ss;
+        for (int i = 1; i < e->split.size(); ++i) {
+          ss << e->split[i] << " ";
+        }
+        e->socket->stream() << ss.str() << "\r\n";
+        e->socket->stream() << pb2::ircstream::nreply(e, "Done!");
+      }
+    };
+    pb2_plugin->register_command(cmd_raw);
+    
+    pb2::command cmd_flushq {
+      .pplugin     = pb2_plugin,
+      .name        = "flushq",
+      .usage       = "",
+      .description = "flushes the queue",
+      .cooldow     = 0,
+      .flag        = "world",
+      .handler     = [] (pb2::command& c, pb2::event_command::ptr e) {
+        e->socket->flushq();
+        e->socket->stream() << pb2::ircstream::nreply(e, "Done!");
+      }
+    };
+    pb2_plugin->register_command(cmd_flushq);
   }
   
   void pb2_deinit() {
