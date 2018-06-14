@@ -55,7 +55,7 @@ install(FILES ${CMAKE_BINARY_DIR}/particlebot2.pc DESTINATION lib/pkgconfig)
 
 
 install(
-  TARGETS particlebot2 libparticlebot2 pb2-core pb2-core
+  TARGETS particlebot2 libparticlebot2 pb2-core pb2-chanop pb2-fun
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
 )
