@@ -198,8 +198,8 @@ namespace pb2 {
   }
   
   void ircsocket_private::read_loop() {
-    std::string tname = "reader: " + pub.name;
-    pthread_setname_np(pthread_self(), tname.c_str());
+    std::stringstream tname; tname << "reader: " << pub.name;
+    pthread_setname_np(pthread_self(), tname.str().c_str());
     
     while (true) {
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -243,8 +243,8 @@ namespace pb2 {
   }
 
   void ircsocket_private::write_loop() {
-    std::string tname = "writer: " + pub.name;
-    pthread_setname_np(pthread_self(), tname.c_str());
+    std::stringstream tname; tname << "writer: " << pub.name;
+    pthread_setname_np(pthread_self(), tname.str().c_str());    
     
     std::string popped;
     bool wrote = true;
@@ -319,8 +319,8 @@ namespace pb2 {
    */
 
   ircsocket::ircsocket(std::weak_ptr<particledi::dm> dm, std::string _name, config_server_t& cfg)
-  : priv(new ircsocket_private(*this, dm, _name, cfg))
-  , name(_name)
+  : name(_name)
+  , priv(new ircsocket_private(*this, dm, _name, cfg))
   {
     priv->l.debug("Initialized pb2::ircsocket and pb2::ircsocket_private");
   }
@@ -332,10 +332,6 @@ namespace pb2 {
   ircstream ircsocket::stream() {
     return ircstream(*this);
   }
-
-  /*
-   * Protected implementation
-   */
 
   void ircsocket::connect() {
     priv->connect();

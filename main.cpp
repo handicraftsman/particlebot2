@@ -9,6 +9,7 @@ extern "C" {
 
 #include <guosh.hpp>
 #include <particledi.hpp>
+#include <pthread.h>
 
 #include "particlebot2.hpp"
 
@@ -47,7 +48,9 @@ void display_usage(char* pname) {
 }
 
 int main(int argc, char** argv) {
-   int opt;
+  pthread_setname_np(pthread_self(), "bot");
+  
+  int opt;
   
   static struct option long_options[] = {
     {"help", 0, NULL, 'h'},

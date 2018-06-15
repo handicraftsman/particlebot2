@@ -46,8 +46,8 @@ namespace pb2 {
     virtual void enqueue(std::string& msg);
 
   private:
-    std::shared_ptr<ircsocket_private> priv;
     std::string name;
+    std::shared_ptr<ircsocket_private> priv;
   };
 
 }
