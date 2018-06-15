@@ -12,7 +12,7 @@ static unsigned writer(char* data, size_t size, size_t nmemb, std::string* write
   if (writer == NULL)
     return 0;
   writer->append(data, size * nmemb);
-  if (writer->size() >= 102400) {
+  if (writer->size() >= 5000000) {
     return -1;
   } else {
     return size * nmemb;
@@ -30,7 +30,7 @@ bool send(std::string url, std::string& buf) {
   curl_easy_setopt(curl, CURLOPT_URL,            url.c_str());
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
   curl_easy_setopt(curl, CURLOPT_MAXREDIRS,      5);
-  curl_easy_setopt(curl, CURLOPT_RANGE,          "0-102400");
+  curl_easy_setopt(curl, CURLOPT_RANGE,          "0-5000000");
   curl_easy_setopt(curl, CURLOPT_TIMEOUT,        30);
   curl_easy_setopt(curl, CURLOPT_HEADERDATA,     NULL);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER,     headers);
