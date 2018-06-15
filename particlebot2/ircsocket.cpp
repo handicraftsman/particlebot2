@@ -114,6 +114,9 @@ namespace pb2 {
     std::lock_guard<std::mutex> write_lock(write_mtx);
     std::lock_guard<std::mutex> running_lock(running_mtx);
     
+    std::string tname = "connect: " + pub.name;
+    pthread_setname_np(pthread_self(), tname.c_str());
+    
     try {
       pub.flushq();
       
@@ -195,6 +198,9 @@ namespace pb2 {
   }
   
   void ircsocket_private::read_loop() {
+    std::string tname = "reader: " + pub.name;
+    pthread_setname_np(pthread_self(), tname.c_str());
+    
     while (true) {
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
       std::lock_guard<std::mutex> write_lock(write_mtx);
@@ -237,6 +243,9 @@ namespace pb2 {
   }
 
   void ircsocket_private::write_loop() {
+    std::string tname = "writer: " + pub.name;
+    pthread_setname_np(pthread_self(), tname.c_str());
+    
     std::string popped;
     bool wrote = true;
     
