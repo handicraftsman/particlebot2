@@ -1,6 +1,7 @@
 #include "db_service.hpp"
 
 #include <sstream>
+#include <mutex>
 
 #include <cstring>
 
@@ -35,6 +36,8 @@ namespace pb2 {
     Guosh::Logger l;
     
     sqlite3* db;
+    
+    std::mutex mtx;
   };
   
   /*
@@ -75,6 +78,8 @@ namespace pb2 {
   }
   
   bool db_service_private::check(flag& f) {
+    std::lock_guard<std::mutex> lock(mtx);
+    
     if (f.name == "world") return true;
     
     sqlite3_stmt* stmt;
@@ -183,6 +188,8 @@ namespace pb2 {
   }
   
   void db_service_private::insert(flag& f) {
+    std::lock_guard<std::mutex> lock(mtx);
+    
     std::stringstream ss;
     
     ss << "INSERT INTO flags (server";
@@ -235,6 +242,8 @@ namespace pb2 {
   }
   
   void db_service_private::remove(flag& f) {
+    std::lock_guard<std::mutex> lock(mtx);
+    
     std::stringstream ss;
     
     ss << "DELETE FROM flags WHERE server=:server";
@@ -338,6 +347,8 @@ namespace pb2 {
   }
   
   std::vector<flag> db_service_private::list(flag& f) {
+    std::lock_guard<std::mutex> lock(mtx);
+    
     std::vector<flag> v;
 
     replace_all(f.server, "'", "");

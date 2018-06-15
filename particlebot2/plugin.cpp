@@ -1,5 +1,6 @@
 #include "plugin.hpp"
 
+#include <functional>
 #include <future>
 #include <thread>
 
@@ -84,7 +85,7 @@ namespace pb2 {
     
     if (db_s->check(f)) {
       last_uses[tpl] = current;
-      handler(*this, e);
+      std::thread(std::bind(handler, *this, e)).detach();
     }
   }
   
