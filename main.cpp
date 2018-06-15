@@ -48,8 +48,6 @@ void display_usage(char* pname) {
 }
 
 int main(int argc, char** argv) {
-  pthread_setname_np(pthread_self(), "bot");
-  
   int opt;
   
   static struct option long_options[] = {

@@ -87,8 +87,6 @@ namespace pb2 {
     if (db_s->check(f)) {
       last_uses[tpl] = current;
       std::thread([this, &f, e] () {
-        std::string tname = "command handler: " + pplugin->name + "/" + name + " (" + f.name.value_or("?") + ")";
-        pthread_setname_np(pthread_self(), tname.c_str());
         handler(*this, e);
       }).detach();
     }
@@ -142,8 +140,6 @@ namespace pb2 {
       std::shared_ptr<void> _handle = handle;
       std::async([this, &id, handler, e, _handle] () {
         char* did = abi::__cxa_demangle(id.c_str(), nullptr, nullptr, nullptr);
-        std::string tname = "event handler: " + std::string(did);
-        pthread_setname_np(pthread_self(), tname.c_str());
         try {
           handler(e);
         } catch (std::exception& exc) {
