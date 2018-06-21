@@ -20,7 +20,7 @@ namespace pb2 {
   
     typedef std::shared_ptr<plugin_service> ptr;
   
-    plugin_service();
+    plugin_service(particledi::dm_ptr dm);
     virtual ~plugin_service();
 
     std::optional<plugin::ptr> get(std::string& name);
@@ -31,6 +31,7 @@ namespace pb2 {
 
     void handle_command(event_command::ptr e);
     
+    particledi::dm_ptr dm;
     std::map<std::string, plugin::ptr> plugins;
   };
 }

@@ -87,13 +87,20 @@ namespace pb2 {
     if (db_s->check(f)) {
       last_uses[tpl] = current;
       std::thread([this, &f, e] () {
-        handler(*this, e);
+        try {
+          handler(*this, e);
+        } catch (std::exception& exc) {
+          char* exc_name = abi::__cxa_demangle(typeid(exc).name(), nullptr, nullptr, nullptr);
+          pplugin->l.error("Exception: %s (%s)\n\tin %s command handler", exc_name, exc.what(), name.c_str());
+          free(exc_name);
+        }
       }).detach();
     }
   }
   
-  plugin::plugin(std::string& _name, std::vector<std::pair<std::string, std::string>>& cfg)
-  : handle(nullptr)
+  plugin::plugin(particledi::dm_ptr _dm, std::string& _name, std::vector<std::pair<std::string, std::string>>& cfg)
+  : dm(_dm)
+  , handle(nullptr)
   , name(_name)
   , l("?" + name)
   {

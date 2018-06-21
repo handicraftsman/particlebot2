@@ -4,7 +4,9 @@
 
 namespace pb2 {
 
-  plugin_service::plugin_service() {}
+  plugin_service::plugin_service(particledi::dm_ptr _dm)
+  : dm(_dm)
+  {}
   plugin_service::~plugin_service() {}
 
   std::optional<plugin::ptr> plugin_service::get(std::string& name) {
@@ -18,7 +20,7 @@ namespace pb2 {
   }
 
   void plugin_service::load_plugin(std::string& name, std::vector<std::pair<std::string, std::string>>& cfg) {
-    plugin::ptr p(new plugin(name, cfg));
+    plugin::ptr p(new plugin(dm, name, cfg));
 
     plugins[name] = p;
   }

@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
   particledi::dm_ptr dm = particledi::dm::create();
   dm->set<pb2::config_service>(new pb2::config_service(config_file));
   dm->set<pb2::db_service>(new pb2::db_service(db_file));
-  dm->set<pb2::plugin_service>(new pb2::plugin_service());
+  dm->set<pb2::plugin_service>(new pb2::plugin_service(dm));
 
   pb2::bot* bot = new pb2::bot(dm);
 

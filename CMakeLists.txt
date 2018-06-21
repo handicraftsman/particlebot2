@@ -42,6 +42,11 @@ add_library(pb2-fun SHARED ${pb2_fun_SRC})
 target_link_libraries(pb2-fun libparticlebot2 ${PB2_LIBRARIES})
 target_include_directories(pb2-fun PRIVATE . ${PB2_INCLUDE_DIRS})
 
+file(GLOB pb2_calcs_SRC calcs/*.cpp)
+add_library(pb2-calcs SHARED ${pb2_calcs_SRC})
+target_link_libraries(pb2-calcs libparticlebot2 ${PB2_LIBRARIES})
+target_include_directories(pb2-calcs PRIVATE . ${PB2_INCLUDE_DIRS})
+
 add_executable(particlebot2 main.cpp)
 target_link_libraries(particlebot2 libparticlebot2 ${PB2_LIBRARIES})
 target_include_directories(particlebot2 PRIVATE ${PB2_INCLUDE_DIRS})

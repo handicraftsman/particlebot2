@@ -7,6 +7,8 @@
 
 #include <particledi.hpp>
 
+typedef struct sqlite3 sqlite3;
+
 namespace pb2 {
   
   struct flag {
@@ -33,6 +35,8 @@ namespace pb2 {
     void remove(flag& f);
     std::vector<flag> list(flag& f);
 
+    sqlite3* get_db();
+    
   private:    
     std::shared_ptr<db_service_private> priv;
   };

@@ -62,7 +62,7 @@ namespace pb2 {
     
     friend plugin_service;
  
-    plugin(std::string& name, std::vector<std::pair<std::string, std::string>>& cfg);
+    plugin(particledi::dm_ptr dm, std::string& name, std::vector<std::pair<std::string, std::string>>& cfg);
     ~plugin();
 
     template<class T>
@@ -83,6 +83,8 @@ namespace pb2 {
     
     bool handle_command(event_command::ptr e);
 
+    particledi::dm_ptr dm;
+    
     std::string name;
 
     Guosh::Logger l;

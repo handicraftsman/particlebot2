@@ -93,7 +93,7 @@ extern "C" {
     
     pb2_plugin->register_event_handler<pb2::event_ping>([] (pb2::event::ptr _e) {
       pb2::event_ping::ptr e = pb2_ptrcast<pb2::event_ping>(_e);
-      e->socket->stream() << ("PONG " + e->target + "\r\n");
+      e->socket->stream() << ("PONG :" + e->target + "\r\n");
     });
     
     pb2_plugin->register_event_handler<pb2::event_code>([] (pb2::event::ptr _e) {

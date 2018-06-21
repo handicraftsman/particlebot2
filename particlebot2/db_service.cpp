@@ -416,5 +416,9 @@ namespace pb2 {
   std::vector<flag> db_service::list(flag& f) {
     return priv->list(f);
   }
+  
+  sqlite3* db_service::get_db() {
+    return priv->db;
+  }
 
 }
