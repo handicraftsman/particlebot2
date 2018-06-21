@@ -1,6 +1,8 @@
 #include "../particlebot2.hpp"
 
+#include <codecvt>
 #include <regex>
+#include <locale>
 
 #include <libxml/tree.h>
 #include <libxml/HTMLparser.h>
@@ -25,18 +27,18 @@ bool send(std::string url, std::string& buf) {
   CURL* curl = curl_easy_init();
 
   struct curl_slist* headers = NULL;
-  headers = curl_slist_append(headers, "Content-Type: text/html");
-  
-  curl_easy_setopt(curl, CURLOPT_URL,            url.c_str());
-  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
-  curl_easy_setopt(curl, CURLOPT_MAXREDIRS,      5);
-  curl_easy_setopt(curl, CURLOPT_RANGE,          "0-5000000");
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT,        30);
-  curl_easy_setopt(curl, CURLOPT_HEADERDATA,     NULL);
-  curl_easy_setopt(curl, CURLOPT_HTTPHEADER,     headers);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,  writer);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA,      &buf);
-  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER,    ebuf);
+  headers = curl_slist_append(headers, "Content-Type: text/html; charset=utf-8");
+  curl_easy_setopt(curl, CURLOPT_URL,             url.c_str());
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,  true);
+  curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+  curl_easy_setopt(curl, CURLOPT_MAXREDIRS,       5);
+  curl_easy_setopt(curl, CURLOPT_RANGE,           "0-5000000");
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT,         30);
+  curl_easy_setopt(curl, CURLOPT_HEADERDATA,      NULL);
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER,      headers);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,   writer);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA,       &buf);
+  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER,     ebuf);
   
   CURLcode code = curl_easy_perform(curl);
   
@@ -85,7 +87,7 @@ extern "C" {
             if (!send(url, ret)) {
               return;
             }
-            xmlDoc* doc = htmlReadDoc((xmlChar*) ret.c_str(), NULL, NULL, HTML_PARSE_RECOVER | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING);
+            xmlDoc* doc = htmlReadDoc((xmlChar*) ret.c_str(), NULL, "utf-8", HTML_PARSE_RECOVER | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING);
           
             xmlNode* r = xmlDocGetRootElement(doc);
             xmlpp::Element* root = new xmlpp::Element(r);
@@ -96,7 +98,7 @@ extern "C" {
               if (elements.size() > 0) {
                 auto n = static_cast<xmlpp::ContentNode*>(elements[0]);
                 std::string title = n->get_content().substr(0, 256);
-                e->socket->stream() << pb2::ircstream::reply(e, "%C?GREEN&B[&N%C?GREEN" + title + "&B]&N");
+                e->socket->stream() << pb2::ircstream::reply(e, "%C?GREEN&B[&N%C?GREEN" + title + u8"&B]&N");
               } else {
                 e->socket->stream() << pb2::ircstream::reply(e, "%C?BLUE&B[&N%C?BLUEno title&B]&N");
               }

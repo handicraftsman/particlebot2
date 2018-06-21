@@ -1,6 +1,7 @@
 #include "ircstream.hpp"
 
 #include <vector>
+#include <locale>
 
 pb2::ircstream::ircstream(pb2::ircsocket_base& _socket)
 : std::ostream(this)
@@ -96,7 +97,7 @@ static void format(std::string& message) {
 
 std::string pb2::ircstream::privmsg(std::string target, std::string message) {
   std::stringstream ss;
-
+  
   format(message);
   for (std::string str : split_every(message, 400)) {
     ss << ("PRIVMSG " + target + " :" + str + "\r\n");

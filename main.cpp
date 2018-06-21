@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <locale>
 
 extern "C" {
   #include <getopt.h>
@@ -48,6 +49,8 @@ void display_usage(char* pname) {
 }
 
 int main(int argc, char** argv) {
+  std::setlocale(LC_ALL, "en_US.UTF-8");
+  
   int opt;
   
   static struct option long_options[] = {
