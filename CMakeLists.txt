@@ -54,12 +54,21 @@ target_include_directories(particlebot2 PRIVATE ${PB2_INCLUDE_DIRS})
 
 pkg_search_module(CURL libcurl)
 pkg_search_module(XML libxml++-2.6)
+pkg_search_module(JSON jsoncpp)
+
 if (CURL_FOUND)
   if (XML_FOUND)
     file(GLOB pb2_titler_SRC titler/*.cpp)
     add_library(pb2-titler SHARED ${pb2_titler_SRC})
     target_link_libraries(pb2-titler libparticlebot2 ${PB2_LIBRARIES} ${CURL_LIBRARIES} ${XML_LIBRARIES})
     target_include_directories(pb2-titler PRIVATE . ${PB2_INCLUDE_DIRS} ${CURL_INCLUDE_DIRS} ${XML_INCLUDE_DIRS})
+  endif()
+  
+  if (JSON_FOUND)
+    file(GLOB pb2_urban_SRC urban/*.cpp)
+    add_library(pb2-urban SHARED ${pb2_urban_SRC})
+    target_link_libraries(pb2-urban libparticlebot2 ${PB2_LIBRARIES} ${CURL_LIBRARIES} ${JSON_LIBRARIES})
+    target_include_directories(pb2-urban PRIVATE . ${PB2_INCLUDE_DIRS} ${CURL_INCLUDE_DIRS} ${JSON_INCLUDE_DIRS})
   endif()
 endif()
 
