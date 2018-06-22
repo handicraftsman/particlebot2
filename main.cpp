@@ -12,8 +12,10 @@ extern "C" {
 #include <particledi.hpp>
 #include <pthread.h>
 
-#include "particlebot2.hpp"
+#include <curl/curl.h>
 
+#include "particlebot2.hpp"
+ 
 void set_log_level(std::string str) {
   std::transform(str.begin(), str.end(), str.begin(), ::tolower);
   Guosh::LogLevel lvl = Guosh::LogLevel::INFO;
@@ -49,6 +51,8 @@ void display_usage(char* pname) {
 }
 
 int main(int argc, char** argv) {
+  curl_global_init(CURL_GLOBAL_ALL);
+  
   std::setlocale(LC_ALL, "en_US.UTF-8");
   
   int opt;
@@ -93,5 +97,6 @@ int main(int argc, char** argv) {
   bot->load_config();
   bot->start();
 
+  curl_global_cleanup();
   return 0;
 }

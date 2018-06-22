@@ -68,6 +68,7 @@ static std::vector<std::string> split_every(std::string& s, size_t e) {
 
 static void format(std::string& message) {
   static std::vector<std::pair<std::string, std::string>> rules {
+    std::pair<std::string, std::string>("&Z",      "\u200B"),
     std::pair<std::string, std::string>("&N",      "\x0F"),
     std::pair<std::string, std::string>("&B",      "\x02"),
     std::pair<std::string, std::string>("&U",      "\x1F"),
@@ -100,7 +101,7 @@ std::string pb2::ircstream::privmsg(std::string target, std::string message) {
   
   format(message);
   for (std::string str : split_every(message, 400)) {
-    ss << ("PRIVMSG " + target + " :" + str + "\r\n");
+    ss << ("PRIVMSG " + target + " :\u200B" + str + "\r\n");
   }
 
   return ss.str();
@@ -111,7 +112,7 @@ std::string pb2::ircstream::notice(std::string target, std::string message) {
 
   format(message);
   for (std::string str : split_every(message, 400)) {
-    ss << ("NOTICE " + target + " :" + str + "\r\n");
+    ss << ("NOTICE " + target + " :\u200B" + str + "\r\n");
   }
 
   return ss.str();

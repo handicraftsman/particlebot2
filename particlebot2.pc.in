@@ -1,6 +1,6 @@
 Name: particlebot2
 Description: An IRC bot framework
 Version: @PROJECT_VERSION@
-Requires: guosh particledi particleini sqlite3
+Requires: guosh particledi particleini sqlite3 libcurl
 Cflags: -I@CMAKE_INSTALL_PREFIX@/include/
-Libs: -L@CMAKE_INSTALL_PREFIX@/lib/ -lparticlebot2
+Libs: -L@CMAKE_INSTALL_PREFIX@/lib/ -lparticlebot2 -ldl -lpthread

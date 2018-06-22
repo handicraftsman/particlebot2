@@ -60,8 +60,12 @@ query::query(std::string _term) : term(_term) {
 static unsigned writer(char* data, size_t size, size_t nmemb, std::string* writer) {
   if (writer == NULL)
     return 0;
-  writer->append(data, size*nmemb);
-  return size * nmemb;
+  writer->append(data, size * nmemb);
+  if (writer->size() >= 5000000) {
+    return -1;
+  } else {
+    return size * nmemb;
+  }
 }
 
 std::string query::send(std::string url) {
@@ -70,11 +74,17 @@ std::string query::send(std::string url) {
 
   CURL* curl = curl_easy_init();
 
-  curl_easy_setopt(curl, CURLOPT_URL,           url.c_str());
-  curl_easy_setopt(curl, CURLOPT_HEADERDATA,    NULL);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writer);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA,     &buf);
-  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER,   ebuf);
+  curl_easy_setopt(curl, CURLOPT_URL,             url.c_str());
+  curl_easy_setopt(curl, CURLOPT_NOSIGNAL,        true);
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,  true);
+  curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+  curl_easy_setopt(curl, CURLOPT_MAXREDIRS,       5);
+  curl_easy_setopt(curl, CURLOPT_RANGE,           "0-5000000");
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT,         30);
+  curl_easy_setopt(curl, CURLOPT_HEADERDATA,      NULL);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,   writer);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA,       &buf);
+  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER,     ebuf);
 
   CURLcode code = curl_easy_perform(curl);
 

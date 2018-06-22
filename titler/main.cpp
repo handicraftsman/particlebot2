@@ -27,6 +27,7 @@ bool send(std::string url, std::string& buf) {
   struct curl_slist* headers = NULL;
   headers = curl_slist_append(headers, "Content-Type: text/html; charset=utf-8");
   curl_easy_setopt(curl, CURLOPT_URL,             url.c_str());
+  curl_easy_setopt(curl, CURLOPT_NOSIGNAL,        true);
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,  true);
   curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
   curl_easy_setopt(curl, CURLOPT_MAXREDIRS,       5);
@@ -96,20 +97,20 @@ extern "C" {
               if (elements.size() > 0) {
                 auto n = static_cast<xmlpp::ContentNode*>(elements[0]);
                 std::string title = n->get_content().substr(0, 256);
-                e->socket->stream() << pb2::ircstream::reply(e, "%C?GREEN&B[&N%C?GREEN" + title + u8"&B]&N");
+                e->socket->stream() << pb2::ircstream::reply(e, u8"%C?GREEN&B^&N " + title);
               } else {
-                e->socket->stream() << pb2::ircstream::reply(e, "%C?BLUE&B[&N%C?BLUEno title&B]&N");
+                e->socket->stream() << pb2::ircstream::reply(e, u8"%C?BLUE&B^&N <no title>");
               }
-            } catch (std::runtime_error& exc) {
-              e->socket->stream() << pb2::ircstream::reply(e, "%C?RED&B[&N%C?REDerror&B]&N");
+            } catch (std::exception& exc) {
+              e->socket->stream() << pb2::ircstream::reply(e, u8"%C?RED&B^&N <error>");
               delete root;
               xmlFreeDoc(doc);
               throw exc;
             }
             delete root;
             xmlFreeDoc(doc);
-          } catch (std::runtime_error& exc) {
-            e->socket->stream() << pb2::ircstream::reply(e, "%C?RED&B[&N%C?REDerror&B]&N");
+          } catch (std::exception& exc) {
+            e->socket->stream() << pb2::ircstream::reply(e, u8"%C?RED&B^&N <error>");
             throw exc;
           }
         }
