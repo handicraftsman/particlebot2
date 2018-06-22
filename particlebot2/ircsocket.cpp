@@ -222,10 +222,10 @@ namespace pb2 {
             l.io("R> %s", msg.c_str());
             std::weak_ptr<particledi::dm> dm_(dm);
             pb2::ircsocket& pub_ = pub;
-            std::thread([dm_, pub_, msg] () {
+            std::thread([dm_, &pub_, msg] () {
               std::string msg_(msg);
               std::shared_ptr<bot> b = dm_.lock()->get<bot>();
-              b->emit(event_message::create(b.get(), (pb2::ircsocket_base::cptr) &pub_, msg_));
+              b->emit(event_message::create(b.get(), &pub_, msg_));
             }).detach();            
           }
         } catch (std::exception& exc) {
