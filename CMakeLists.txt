@@ -48,6 +48,11 @@ add_library(pb2-calcs SHARED ${pb2_calcs_SRC})
 target_link_libraries(pb2-calcs libparticlebot2 ${PB2_LIBRARIES})
 target_include_directories(pb2-calcs PRIVATE . ${PB2_INCLUDE_DIRS})
 
+file(GLOB pb2_quotes_SRC quotes/*.cpp)
+add_library(pb2-quotes SHARED ${pb2_quotes_SRC})
+target_link_libraries(pb2-quotes libparticlebot2 ${PB2_LIBRARIES})
+target_include_directories(pb2-quotes PRIVATE . ${PB2_INCLUDE_DIRS})
+
 add_executable(particlebot2 main.cpp)
 target_link_libraries(particlebot2 libparticlebot2 ${PB2_LIBRARIES})
 target_include_directories(particlebot2 PRIVATE ${PB2_INCLUDE_DIRS})
@@ -60,6 +65,10 @@ if (XML_FOUND)
   add_library(pb2-titler SHARED ${pb2_titler_SRC})
   target_link_libraries(pb2-titler libparticlebot2 ${PB2_LIBRARIES} ${XML_LIBRARIES})
   target_include_directories(pb2-titler PRIVATE . ${PB2_INCLUDE_DIRS} ${XML_INCLUDE_DIRS})
+  install(
+    TARGETS pb2-titler
+    LIBRARY DESTINATION lib
+  )
 endif()
   
 if (JSON_FOUND)
@@ -67,6 +76,10 @@ if (JSON_FOUND)
   add_library(pb2-urban SHARED ${pb2_urban_SRC})
   target_link_libraries(pb2-urban libparticlebot2 ${PB2_LIBRARIES} ${JSON_LIBRARIES})
   target_include_directories(pb2-urban PRIVATE . ${PB2_INCLUDE_DIRS} ${JSON_INCLUDE_DIRS})
+  install(
+    TARGETS pb2-urban
+    LIBRARY DESTINATION lib
+  )
 endif()
 
 
@@ -75,7 +88,7 @@ install(FILES ${CMAKE_BINARY_DIR}/particlebot2.pc DESTINATION lib/pkgconfig)
 
 
 install(
-  TARGETS particlebot2 libparticlebot2 pb2-core pb2-chanop pb2-fun
+  TARGETS particlebot2 libparticlebot2 pb2-core pb2-chanop pb2-fun pb2-calcs pb2-quotes
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
 )

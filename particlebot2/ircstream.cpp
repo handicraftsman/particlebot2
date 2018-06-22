@@ -119,11 +119,13 @@ std::string pb2::ircstream::notice(std::string target, std::string message) {
 }
 
 std::string pb2::ircstream::ctcp(std::string target, std::string type, std::string message) {
-  return pb2::ircstream::privmsg(target, "\x01" + type + " " + message + "\x01");
+  format(message);
+  return "PRIVMSG " + target + " :\x01" + type + " " + message + "\x01\r\n";
 }
 
 std::string pb2::ircstream::nctcp(std::string target, std::string type, std::string message) {
-  return pb2::ircstream::notice(target, "\x01" + type + " " + message + "\x01");
+  format(message);
+  return "NOTICE " + target + " :\x01" + type + " " + message + "\x01\r\n";
 }
 
 std::string pb2::ircstream::join(std::string channel) {
